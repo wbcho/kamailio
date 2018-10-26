@@ -1,5 +1,5 @@
 #!/bin/bash
-# checks a configuration with 'kamailio -c' and 'kamailio -C'
+# checks a specific configuration with 'kamailio -c'
 
 # Copyright (C) 2007 1&1 Internet AG
 #
@@ -19,8 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-source include/common
-source include/require
+. include/common
+. include/require.sh
 
 CFG=2.cfg
 
@@ -29,12 +29,7 @@ if ! (check_kamailio); then
 fi ;
 
 # start
-../$BIN -w . -c -f $CFG > /dev/null 2>&1
+cat $CFG | cat - route-empty.cfg | $BIN -L $MOD_DIR -w . -a no -c -f - > /dev/null 2>&1
 ret=$?
-
-if [ "$ret" -eq 0 ] ; then
-	../$BIN -C -f $CFG > /dev/null 2>&1
-	ret=$?
-fi ;
 
 exit $ret

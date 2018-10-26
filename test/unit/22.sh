@@ -19,26 +19,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-source include/common
-source include/require
-source include/database
+. include/common
+. include/require.sh
+. include/database.sh
 
 if ! (check_sipsak && check_kamailio && check_module "db_postgres" && check_postgres); then
 	exit 0
 fi ;
 
-CFG=11.cfg
+SIPDOMAIN=127.0.0.1
+CFG=22.cfg
 
-cp $CFG $CFG.tmp
-echo "loadmodule \"$SR_DIR/modules/db_postgres/db_postgres.so\"" >> $CFG
-echo "modparam(\"usrloc\", \"db_url\", \"postgres://kamailio:kamailiorw@localhost/kamailio\")" >> $CFG
-
-$BIN -w . -f $CFG > /dev/null
+$BIN -L $MOD_DIR -Y $RUN_DIR -P $PIDFILE -w . -f $CFG > /dev/null
 ret=$?
 
 sleep 1
 # register a user
-sipsak -U -C sip:foobar@localhost -s sip:49721123456789@localhost -H localhost &> /dev/null
+sipsak -U -C sip:foobar@127.0.0.1 -s sip:49721123456789@$SIPDOMAIN -H $SIPDOMAIN &> /dev/null
 ret=$?
 
 if [ "$ret" -eq 0 ]; then
@@ -55,7 +52,7 @@ fi;
 
 if [ "$ret" -eq 0 ]; then
 	# unregister the user
-	sipsak -U -C "*" -s sip:49721123456789@127.0.0.1 -H localhost -x 0 &> /dev/null
+	sipsak -U -C "*" -s sip:49721123456789@$SIPDOMAIN -H $SIPDOMAIN -x 0 &> /dev/null
 fi;
 
 if [ "$ret" -eq 0 ]; then
@@ -76,11 +73,11 @@ $PSQL "delete from location where username like '49721123456789%';"
 
 if [ "$ret" -eq 0 ]; then
 	# register again
-	sipsak -U -C sip:foobar@localhost -s sip:49721123456789@localhost -H localhost &> /dev/null
+	sipsak -U -C sip:foobar@127.0.0.1 -s sip:49721123456789@$SIPDOMAIN -H $SIPDOMAIN &> /dev/null
 	ret=$?
 fi;
 
-$KILL
+kill_kamailio
 
 # restart to test preload_udomain functionality
 $BIN -w . -f $CFG > /dev/null
@@ -90,7 +87,7 @@ sleep 1
 
 if [ "$ret" -eq 0 ]; then
 	# check if the contact is still registered
-	sipsak -U -C empty -s sip:49721123456789@127.0.0.1 -H localhost -q "Contact: <sip:foobar@localhost>" &> /dev/null
+	sipsak -U -C empty -s sip:49721123456789@$SIPDOMAIN -H $SIPDOMAIN -q "Contact: <sip:foobar@127.0.0.1>" &> /dev/null
 	ret=$?
 fi;
 
@@ -100,10 +97,8 @@ if [ "$ret" -eq 0 ]; then
 	ret=$?
 fi;
 
-$KILL
+kill_kamailio
 
 $PSQL "delete from location where username like '49721123456789%';"
-
-mv $CFG.tmp $CFG
 
 exit $ret

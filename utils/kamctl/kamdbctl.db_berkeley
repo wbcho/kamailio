@@ -1,6 +1,4 @@
 #
-# $Id$
-#
 # Script for maintaining Kamailio Berkeley DB tables
 # Copyright (C) 2007 Cisco Systems
 #
@@ -20,9 +18,6 @@
 # along with this program; if not, write to the Free Software 
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 # 
-# History:
-# --------
-# 2007-09-19  genesis (wiquan)
 #
 
 #constants
@@ -59,6 +54,19 @@ if [ $ret -eq 0 ] ; then
 fi ;
 
 
+which db5.0_dump > /dev/null
+ret=$?
+if [ $ret -eq 0 ] ; then
+	DUMP_CMD="db5.0_dump"
+fi ;
+
+which db5.1_dump > /dev/null
+ret=$?
+if [ $ret -eq 0 ] ; then
+	DUMP_CMD="db5.1_dump"
+fi ;
+
+
 #berkeley db utility program that imports data from plain text file
 #small hack to autodetect the db load command, debian prefix the version..
 
@@ -84,6 +92,19 @@ which db4.6_load > /dev/null
 ret=$?
 if [ $ret -eq 0 ] ; then
 	LOAD_CMD="db4.6_load"
+fi ;
+
+
+which db5.0_load > /dev/null
+ret=$?
+if [ $ret -eq 0 ] ; then
+	LOAD_CMD="db5.0_load"
+fi ;
+
+which db5.1_load > /dev/null
+ret=$?
+if [ $ret -eq 0 ] ; then
+	LOAD_CMD="db5.1_load"
 fi ;
 
 # path to the database schemas
@@ -152,12 +173,6 @@ kamailio_berkeley()  # parms: <op> <arg1> <arg2>
 		export)
 			shift
 			kamailio_export  $1 $DB_PATH
-			exit $?
-			;;
-
-		migrate)
-			shift
-			kamailio_migrate $1 $DB_PATH
 			exit $?
 			;;
 
@@ -284,21 +299,6 @@ kamailio_export()  # parms: <DUMP_DIR> [DB_PATH]
 	mdbg "All tables are now exported to DUMP_DIR: [$1]"
 	return 0
 
-}
-
-
-##
-# MIGRATE (schema)
-# Examine each plain-txt file in DUMP_DIR
-#  (Assumes that kamailio_export was already invoked)
-#
-# Migrate converts data from schema-old to schema-new in place.
-#
-# After this step is complete the IMPORT should be executed.
-kamailio_migrate()  # parms: <DUMP_DIR> [DB_PATH]
-{
-	merr "db_berkeley migrate not implemented"
-	exit 1
 }
 
 

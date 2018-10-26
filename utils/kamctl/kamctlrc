@@ -1,5 +1,3 @@
-# $Id$
-#
 # The Kamailio configuration file for the control tools.
 #
 # Here you can set variables used in the kamctl and kamdbctl setup
@@ -21,6 +19,9 @@
 
 ## database host
 # DBHOST=localhost
+
+## database host
+# DBPORT=3306
 
 ## database name (for ORACLE this is TNS name)
 # DBNAME=kamailio
@@ -46,24 +47,28 @@
 ## database super user (for ORACLE this is 'scheme-creator' user)
 # DBROOTUSER="root"
 
-# user name column
+## password for database super user
+## - important: this is insecure, targeting the use only for automatic testing
+## - known to work for: mysql
+# DBROOTPW="dbrootpw"
+
+## database character set (used by MySQL when creating database)
+#CHARSET="latin1"
+
+## user name column
 # USERCOL="username"
 
 
 # SQL definitions
-# If you change this definitions here, then you must change them 
+# If you change this definitions here, then you must change them
 # in db/schema/entities.xml too.
 # FIXME
 
 # FOREVER="2030-05-28 21:32:15"
-# DEFAULT_ALIASES_EXPIRES=$FOREVER
 # DEFAULT_Q="1.0"
-# DEFAULT_CALLID="Default-Call-ID"
-# DEFAULT_CSEQ="13"
-# DEFAULT_LOCATION_EXPIRES=$FOREVER
 
 
-# Program to calculate a message-digest fingerprint 
+# Program to calculate a message-digest fingerprint
 # MD5="md5sum"
 
 # awk tool
@@ -102,6 +107,9 @@
 # If to install presence related tables.
 # INSTALL_PRESENCE_TABLES=ask
 
+# If to install uid modules related tables.
+# INSTALL_DBUID_TABLES=ask
+
 # Define what module tables should be installed.
 # If you use the postgres database and want to change the installed tables, then you
 # must also adjust the STANDARD_TABLES or EXTRA_TABLES variable accordingly in the
@@ -120,12 +128,12 @@
 ## - default: none
 # ALIASES_TYPE="DB"
 
-## control engine: FIFO or UNIXSOCK
-## - default FIFO
-# CTLENGINE="FIFO"
+## control engine: RPCFIFO
+## - default RPCFIFO
+# CTLENGINE="RPCFIFO"
 
-## path to FIFO file
-# FIFOPATH="/tmp/kamailio_fifo"
+## path to FIFO file for engine RPCFIFO
+# RPCFIFOPATH="/var/run/kamailio/kamailio_rpc_fifo"
 
 ## check ACL names; default on (1); off (0)
 # VERIFY_ACL=1
@@ -133,6 +141,10 @@
 ## ACL names - if VERIFY_ACL is set, only the ACL names from below list
 ## are accepted
 # ACL_GROUPS="local ld int voicemail free-pstn"
+
+## check if user exists (used by some commands such as acl);
+## - default on (1); off (0)
+# VERIFY_USER=1
 
 ## verbose - debug purposes - default '0'
 # VERBOSE=1
@@ -142,8 +154,8 @@
 # STORE_PLAINTEXT_PW=0
 
 ## Kamailio START Options
-## PID file path - default is: /var/run/kamailio.pid
-# PID_FILE=/var/run/kamailio.pid
+## PID file path - default is: /var/run/kamailio/kamailio.pid
+# PID_FILE=/var/run/kamailio/kamailio.pid
 
 ## Extra start options - default is: not set
 # example: start Kamailio with 64MB share memory: STARTOPTIONS="-m 64"

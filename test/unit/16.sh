@@ -19,8 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-source include/common
-source include/require
+. include/common
+. include/require.sh
 
 # Needs a default kamailio database setup for postgres
 
@@ -28,20 +28,20 @@ if ! (check_kamailio && check_module "db_postgres" ); then
 	exit 0
 fi ;
 
-CFG=2.cfg
-cp $CFG $CFG.bak
+CFG=16.cfg
 
-echo "loadmodule \"../../modules/db_postgres/db_postgres.so\"" >> $CFG
-echo "modparam(\"$DB_ALL_MOD\", \"db_url\", \"postgres://kamailioro:kamailioro@localhost/kamailio\")" >> $CFG
+cp 2.cfg $CFG
+printf "loadmodule \"db_postgres/db_postgres.so\"" >> $CFG
+printf "modparam(\"$DB_ALL_MOD\", \"db_url\", \"postgres://kamailioro:kamailioro@localhost/kamailio\")" >> $CFG
+printf "\nrequest_route {\n ;\n}" >> $CFG
 
 # start
-$BIN -w . -f $CFG > /dev/null
+$BIN -L $MOD_DIR -Y $RUN_DIR -P $PIDFILE -w . -f $CFG > /dev/null
 ret=$?
 
 sleep 1
-$KILL
+kill_kamailio
 
-mv $CFG.bak $CFG
-rm -f dispatcher.list
+rm $CFG
 
 exit $ret

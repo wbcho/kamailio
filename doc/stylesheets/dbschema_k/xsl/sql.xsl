@@ -51,11 +51,10 @@
 	    <xsl:call-template name="get-name"/>
 	</xsl:variable>
 
-	<!-- Create row in version table -->
-	<xsl:apply-templates select="version"/>
-
 	<xsl:text>CREATE TABLE </xsl:text>
+	<xsl:call-template name="quotechar"/>
 	<xsl:value-of select="$table.name"/>
+	<xsl:call-template name="quotechar"/>
 	<xsl:text> (&#x0A;</xsl:text>
 
 	<!-- Process all columns -->
@@ -71,11 +70,16 @@
 
 	<xsl:call-template name="table.close"/>
 
+	<!-- Create indexes for table -->
 	<xsl:for-each select="index[count(child::unique)=0]">
 	    <xsl:if test="not(child::primary)">
 	        <xsl:call-template name="create_index"/>
 	    </xsl:if>
 	</xsl:for-each>
+	<!-- Create row in version table -->
+	<xsl:apply-templates select="version"/>
+	<xsl:text>&#x0A;</xsl:text>
+
     </xsl:template>
 
 <!-- ################ /TABLE ################  -->
@@ -173,7 +177,9 @@
 
     <xsl:template match="column">
 	<xsl:text>    </xsl:text>
+	<xsl:call-template name="quotechar"/>
 	<xsl:call-template name="get-name"/>
+	<xsl:call-template name="quotechar"/>
 	<xsl:text> </xsl:text>
 
 	<xsl:call-template name="column.type"/>
@@ -245,9 +251,11 @@
 <!-- ################ COLREF ################  -->
 
     <xsl:template match="colref">
+	<xsl:call-template name="quotechar"/>
 	<xsl:call-template name="get-column-name">
 	    <xsl:with-param name="select" select="@linkend"/>
 	</xsl:call-template>
+	<xsl:call-template name="quotechar"/>
 	<xsl:if test="not(position()=last())">
 	    <xsl:text>, </xsl:text>
 	</xsl:if>
